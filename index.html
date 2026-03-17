@@ -354,7 +354,63 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 }
 .restart-btn:hover{background:var(--surface);color:var(--navy);border-color:var(--navy);}
 
+/* ─── CELEBRATION SCREEN ─── */
+#s-celebrate{
+  align-items:center;justify-content:center;padding:2rem;
+  background:linear-gradient(160deg,#e8f0fb 0%,var(--bg) 50%,#e8f5ee 100%);
+}
+.cel-inner{text-align:center;max-width:420px;}
+.cel-emoji{font-size:80px;margin-bottom:1rem;animation:bounce 1s ease infinite alternate;}
+@keyframes bounce{0%{transform:translateY(0);}100%{transform:translateY(-16px);}}
+.cel-title{font-family:'Nunito',sans-serif;font-size:32px;font-weight:800;color:var(--navy);margin-bottom:.75rem;}
+.cel-sub{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:.75rem;}
+.cel-xp{display:inline-block;padding:8px 24px;border-radius:99px;background:var(--cognitive-l);color:var(--blue);font-family:'Nunito',sans-serif;font-weight:700;font-size:16px;margin-bottom:2rem;}
+.domain-complete-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:2rem;}
+.dc-chip{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;font-family:'Nunito',sans-serif;}
+
+/* ─── OVERALL PROGRESS BAR ─── */
+.overall-progress{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:.6rem 1.5rem;display:flex;align-items:center;gap:10px;
+}
+.op-label{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;font-family:'Nunito',sans-serif;letter-spacing:.04em;}
+.op-bar-bg{flex:1;height:4px;border-radius:99px;background:var(--border);overflow:hidden;}
+.op-segments{display:flex;height:4px;gap:2px;}
+.op-seg{flex:1;border-radius:99px;transition:background .5s ease;}
+.op-pct{font-size:11px;color:var(--faint);font-weight:600;white-space:nowrap;}
+
+/* ─── CLINICAL FLAG ─── */
+.clinical-flag{
+  background:#fff8f0;border:1px solid #f5c87a;border-radius:var(--r);
+  padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:12px;align-items:flex-start;
+}
+.cf-icon{font-size:20px;flex-shrink:0;}
+.cf-title{font-size:13px;font-weight:700;color:#92580a;font-family:'Nunito',sans-serif;margin-bottom:.25rem;}
+.cf-text{font-size:12px;color:#7a5020;line-height:1.6;}
+
+/* ─── RECOMMENDATIONS ─── */
+.recs-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem;}
+.rec-item{display:flex;gap:14px;align-items:flex-start;padding:.9rem 0;border-bottom:1px solid var(--border);}
+.rec-item:last-child{border-bottom:none;padding-bottom:0;}
+.rec-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.rec-body{}
+.rec-domain{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.2rem;font-family:'Nunito',sans-serif;}
+.rec-title{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:.2rem;font-family:'Nunito',sans-serif;}
+.rec-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ─── ACCORDION BREAKDOWN ─── */
+.bd-accordion-header{
+  display:flex;align-items:center;gap:8px;padding:.9rem 0;cursor:pointer;
+  border-bottom:1px solid var(--border);user-select:none;
+}
+.bd-accordion-header:last-of-type{border-bottom:none;}
+.bd-accordion-arrow{margin-left:auto;font-size:12px;color:var(--faint);transition:transform .25s;}
+.bd-accordion-arrow.open{transform:rotate(180deg);}
+.bd-accordion-body{display:none;padding:.75rem 0 .25rem;}
+.bd-accordion-body.open{display:block;}
+
 /* Prospective memory banner */
+
 .pm-banner{
   background:linear-gradient(135deg,var(--navy),var(--blue));
   border-radius:var(--r);padding:1rem 1.25rem;color:#fff;margin-bottom:1rem;
@@ -497,6 +553,13 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <span class="xp-badge" id="tb-xp">0 XP</span>
     </div>
   </div>
+  <div class="overall-progress" id="overall-progress">
+    <span class="op-label">OVERALL</span>
+    <div class="op-bar-bg">
+      <div class="op-segments" id="op-segments"></div>
+    </div>
+    <span class="op-pct" id="op-pct">0%</span>
+  </div>
   <div class="game-body">
     <div class="game-inner" id="game-inner">
       <!-- dynamically rendered -->
@@ -505,6 +568,20 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   <div class="navbottom" id="navbottom" style="display:none;">
     <span class="skip-txt" onclick="skipCurrent()">Skip</span>
     <button class="btn-next-game" id="btn-next" disabled onclick="advanceGame()">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 4b: CELEBRATION
+══════════════════════════════════ -->
+<div class="screen" id="s-celebrate">
+  <div class="cel-inner">
+    <div class="cel-emoji">🎉</div>
+    <h2 class="cel-title nunito">Assessment Complete!</h2>
+    <p class="cel-sub">You've completed all four domains. Your personalised Manovita report is being prepared.</p>
+    <div class="cel-xp" id="cel-xp">0 XP earned</div>
+    <div class="domain-complete-chips" id="cel-chips"></div>
+    <button class="btn-primary" style="max-width:320px;margin:0 auto;" onclick="goToResults()">See My Results →</button>
   </div>
 </div>
 
@@ -545,8 +622,20 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     </div>
     <div class="section-title">Domain scores</div>
     <div class="domain-grid" id="domain-grid"></div>
+    <div class="clinical-flag" id="clinical-flag" style="display:none;">
+      <div class="cf-icon">💛</div>
+      <div>
+        <div class="cf-title">A gentle note</div>
+        <div class="cf-text" id="cf-text"></div>
+      </div>
+    </div>
+    <div class="recs-card">
+      <div class="section-title" style="margin-bottom:.25rem;">Recommended next steps</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;">Based on your scores, here are the most impactful things you can do.</p>
+      <div id="recs-inner"></div>
+    </div>
     <div class="breakdown-card">
-      <div class="section-title">Sub-domain breakdown</div>
+      <div class="section-title" style="margin-bottom:1.25rem;">Sub-domain breakdown</div>
       <div id="breakdown-inner"></div>
     </div>
     <button class="restart-btn" onclick="restart()">↺ Retake Assessment</button>
@@ -880,6 +969,27 @@ function updateTopbar(domainLabel, color, sub, current, total){
 // ══════════════════════════════════════════════════
 // PHYSICAL / EMOTIONAL / SOCIAL QUESTIONS
 // ══════════════════════════════════════════════════
+function updateOverallProgress(){
+  const totalQ = 13 + 24 + 24 + 24; // cog games + physical + emotional + social
+  const cogDone = state.cogGameIdx || 0;
+  const physDone = state.domainIdx > 1 ? 24 : (state.domainIdx===1 ? state.qIdx : 0);
+  const emoDone  = state.domainIdx > 2 ? 24 : (state.domainIdx===2 ? state.qIdx : 0);
+  const socDone  = state.domainIdx > 3 ? 24 : (state.domainIdx===3 ? state.qIdx : 0);
+  const done = cogDone + physDone + emoDone + socDone;
+  const pct = Math.round((done/totalQ)*100);
+  const segs = document.getElementById('op-segments');
+  const pctEl = document.getElementById('op-pct');
+  if(!segs || !pctEl) return;
+  const domColors = ['var(--cognitive)','var(--physical)','var(--emotional)','var(--social)'];
+  const domDones = [Math.min(cogDone,13), Math.min(physDone,24), Math.min(emoDone,24), Math.min(socDone,24)];
+  const domTotals = [13,24,24,24];
+  segs.innerHTML = domTotals.map((t,i)=>{
+    const p = Math.round((domDones[i]/t)*100);
+    return `<div style="flex:${t};height:4px;border-radius:99px;background:${p>0?domColors[i]:'var(--border)'};opacity:${p>0?0.3+p/100*0.7:1};"></div>`;
+  }).join('');
+  pctEl.textContent = pct+'%';
+}
+
 function renderQuestion(){
   const d = DOMAINS[state.domainIdx];
   const list = state.currentList;
@@ -903,6 +1013,7 @@ function renderQuestion(){
     </div>`;
   document.getElementById('navbottom').style.display='none';
   goTo('s-game');
+  updateOverallProgress();
   startTimer(20, ()=>{ autoSkipQ(); });
 }
 
@@ -945,12 +1056,12 @@ function skipCurrent(){
 function startTimer(seconds, onEnd){
   clearTimer();
   let left = seconds;
-  const bar = document.getElementById('timer-bar');
   state.gameTimer = setInterval(()=>{
     left -= 0.1;
     const pct = Math.max(0, (left/seconds)*100);
-    if(bar) bar.style.width = pct+'%';
-    if(bar && pct < 30) bar.style.background = '#e05252';
+    const liveBar = document.getElementById('timer-bar');
+    if(liveBar) liveBar.style.width = pct+'%';
+    if(liveBar && pct < 30) liveBar.style.background = '#e05252';
     if(left <= 0){ clearTimer(); onEnd(); }
   }, 100);
 }
@@ -962,6 +1073,17 @@ function clearTimer(){ if(state.gameTimer){ clearInterval(state.gameTimer); stat
 function launchCogGame(idx){
   if(idx >= COG_GAMES.length){ finishDomain(); return; }
   state.cogGameIdx = idx;
+  // Check if PM trigger should fire at this game
+  if(state.pmTriggerAt && maybeInjectPMTrigger(idx)){
+    updateTopbar('Cognitive', 'var(--cognitive)', 'Prospective Memory · Trigger', idx+1, COG_GAMES.length);
+    document.getElementById('navbottom').style.display='none';
+    clearTimer();
+    document.getElementById('game-inner').innerHTML='';
+    goTo('s-game');
+    updateOverallProgress();
+    renderPMTriggerGame();
+    return;
+  }
   const g = COG_GAMES[idx];
   const d = DOMAINS[0]; // cognitive
   updateTopbar('Cognitive', d.color, g.sd, idx+1, COG_GAMES.length);
@@ -970,6 +1092,7 @@ function launchCogGame(idx){
   const inner = document.getElementById('game-inner');
   inner.innerHTML = '';
   goTo('s-game');
+  updateOverallProgress();
   // Dispatch to game renderer
   const renderers = {
     'card-match': renderCardMatch,
@@ -1107,7 +1230,7 @@ function renderOrientation(){
     {q:'What season is it currently?',correct:seasons[now.getMonth()],opts:shuffle([...new Set(['Winter','Spring','Summer','Autumn'])])},
   ];
   let qi=0, correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=qs.length){ scoreCog((correct/qs.length)*100); return; }
     const q=qs[qi];
     document.getElementById('game-inner').innerHTML=`
@@ -1149,13 +1272,13 @@ function renderArithmetic(){
     const wrongs=[ans+rnd(1,5),ans-rnd(1,5),ans+rnd(6,12)].map(Math.abs);
     return {q:`${op==='-'?Math.max(a,b):a} ${op} ${op==='-'?Math.min(a,b):b} = ?`,ans,opts:shuffle([ans,...wrongs.slice(0,3)])};
   }
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=total){ scoreCog((correct/total)*100); return; }
     const q=mkQ();
     document.getElementById('game-inner').innerHTML=`
       <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar" style="width:100%;background:var(--cognitive)"></div></div>
       <div class="game-card">
-        ${cogTag('Arithmetic · Q${qi+1}/${total}')}
+        ${cogTag(`Arithmetic · Q${qi+1}/${total}`)}
         <h3 class="game-title" style="font-size:32px;text-align:center;padding:1rem 0;">${q.q}</h3>
         <div class="opts">${q.opts.map((o,i)=>`<div class="opt" onclick="answerArith(${o},${q.ans})"><div class="opt-letter">${LETTERS[i]}</div><span>${o}</span></div>`).join('')}</div>
       </div>`;
@@ -1179,7 +1302,7 @@ function renderLanguage(){
   const sets={child:[{q:'Which word does NOT belong?',opts:['Dog','Cat','Car','Fish'],odd:'Car'},{q:'Which word is the odd one out?',opts:['Red','Blue','Heavy','Green'],odd:'Heavy'},{q:'Which word is different?',opts:['Run','Jump','Walk','Happy'],odd:'Happy'}],adult:[{q:'Which word does NOT belong in this group?',opts:['Symphony','Melody','Harmony','Architect'],odd:'Architect'},{q:'Which is the odd one out?',opts:['Elated','Joyful','Melancholy','Jubilant'],odd:'Melancholy'},{q:'Which word does not fit?',opts:['Ponder','Reflect','Contemplate','Sprinkle'],odd:'Sprinkle'}]};
   const qs=(sets[user.ag]||sets.adult).slice(0,3);
   let qi=0,correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=qs.length){ scoreCog((correct/qs.length)*100); return; }
     const q=qs[qi];
     document.getElementById('game-inner').innerHTML=`
@@ -1214,7 +1337,7 @@ function renderVisuospatial(){
     {q:'Find the shape that doesn\'t match the others.',items:['🟩','🟩','🟣','🟩'],odd:2},
   ];
   let qi=0,correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=qs.length){ scoreCog((correct/qs.length)*100); return; }
     const q=qs[qi];
     document.getElementById('game-inner').innerHTML=`
@@ -1248,7 +1371,7 @@ function renderLogic(){
     {q:'Find the missing number:',seq:'3, 6, 12, 24, __',opts:['36','42','48','50'],ans:'48'},
   ].slice(0,user.ag==='child'?2:3);
   let qi=0,correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=qs.length){ scoreCog((correct/qs.length)*100); return; }
     const q=qs[qi];
     document.getElementById('game-inner').innerHTML=`
@@ -1279,7 +1402,7 @@ function renderAttention(){
   const target='★'; const distractor='☆';
   const rounds=user.ag==='child'?2:3;
   let qi=0,correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=rounds){ scoreCog((correct/rounds)*100); return; }
     const gridSize=user.ag==='senior'?12:16;
     const targetPos=Math.floor(Math.random()*gridSize);
@@ -1287,7 +1410,7 @@ function renderAttention(){
     document.getElementById('game-inner').innerHTML=`
       <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar" style="width:100%;background:var(--cognitive)"></div></div>
       <div class="game-card">
-        ${cogTag('Attention · Round ${qi+1}/${rounds}')}
+        ${cogTag(`Attention · Round ${qi+1}/${rounds}`)}
         <h3 class="game-title">Find the filled star</h3>
         <p class="game-desc">Tap the ★ (filled star) among the ☆ symbols as fast as you can.</p>
         <div class="grid-game" style="grid-template-columns:repeat(4,56px)">
@@ -1310,7 +1433,7 @@ function renderExecFunction(){
   let qi=0,correct=0,rule='color';
   const rules={color:{q:'Sort by COLOUR — tap RED items',check:(item)=>item.s==='🔴'},number:{q:'Sort by NUMBER — tap items with number > 5',check:(item)=>parseInt(item.n)>5}};
   const rounds=3;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=rounds){ scoreCog((correct/rounds)*100); return; }
     if(qi===1) rule='number';
     const r=rules[rule];
@@ -1350,8 +1473,8 @@ function renderSpeed(){
   let hits=0,started=false;
   const cells=Array.from({length:total},(_,i)=>({id:i,active:false,hit:false}));
   let activeCells=[];
-  function renderGrid(){
-    document.getElementById('tap-area').innerHTML=cells.map((c,i)=>`
+  var renderGrid = function(){
+    const tapAreaEl=document.getElementById('tap-area'); if(tapAreaEl) tapAreaEl.innerHTML=cells.map((c,i)=>`
       <div class="tap-target ${c.active?'active':c.hit?'hit':''}" onclick="tapSpeed(${i})">${c.active?'⭐':c.hit?'✓':'·'}</div>
     `).join('');
   }
@@ -1391,7 +1514,7 @@ function renderSocialCog(){
     {q:'Someone says "Sure, if that\'s what you want" in a tense tone when you suggest a plan. They most likely feel:',opts:['Genuinely happy with the plan','Nervous about the plan','Disappointed or reluctant','Enthusiastic'],ans:2},
   ];
   let qi=0,correct=0;
-  function renderQ(){
+  var renderQ = function(){
     if(qi>=qs.length){ scoreCog((correct/qs.length)*100); return; }
     const q=qs[qi];
     document.getElementById('game-inner').innerHTML=`
@@ -1418,6 +1541,10 @@ function renderSocialCog(){
 
 // ── 12. PROSPECTIVE MEMORY ──
 function renderProspective(){
+  // Phase 1: Show the instruction
+  state.pmFlag = true;
+  state.pmBannerShown = true;
+  state.pmPhase = 'instruct';
   document.getElementById('game-inner').innerHTML=`
     <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar" style="width:100%;background:var(--cognitive)"></div></div>
     <div class="game-card">
@@ -1425,16 +1552,82 @@ function renderProspective(){
       <h3 class="game-title">Remember to act later</h3>
       <div class="pm-banner">
         <div class="pm-icon">🔔</div>
-        <div><strong>Remember this:</strong> When you see a question that mentions "BLUE", tap the answer that says "I remember!" before answering normally.</div>
+        <div><strong>Your task:</strong> In one of the next few questions, you will see the word <strong>"BLUE"</strong> somewhere on screen. When that happens, tap the special button that will appear <em>before</em> choosing your answer.</div>
       </div>
-      <p class="game-desc">This tests whether you can hold a future intention in mind while doing other tasks. Continue the assessment — don't forget!</p>
-      <button class="btn-primary" onclick="pmContinue()">Understood, continue →</button>
+      <p class="game-desc">This tests your ability to hold a future intention while doing other tasks. Do not forget!</p>
+      <button class="btn-primary" onclick="pmStartDistractor()">OK, I'll remember →</button>
     </div>`;
-  state.pmFlag = true;
-  state.pmBannerShown = true;
   clearTimer();
-  startTimer(20,()=>pmContinue());
-  window.pmContinue=function(){ clearTimer(); scoreCog(0,false); launchCogGame(state.cogGameIdx+1); };
+  startTimer(25,()=>pmStartDistractor());
+
+  window.pmStartDistractor = function(){
+    clearTimer();
+    scoreCog(0, false);
+    // Store that PM trigger should appear in game idx+2 (after one distractor game)
+    state.pmTriggerAt = state.cogGameIdx + 2;
+    launchCogGame(state.cogGameIdx + 1);
+  };
+}
+
+function maybeInjectPMTrigger(gameIdx){
+  // Called at start of each cog game after PM instruction
+  if(state.pmFlag && state.pmTriggerAt === gameIdx){
+    state.pmFlag = false; // only trigger once
+    return true;
+  }
+  return false;
+}
+
+function renderPMTriggerGame(){
+  // A distractor task that secretly contains the BLUE trigger
+  const distractorQ = {
+    q: 'Which of the following colours is a PRIMARY colour?',
+    opts: ['Green','BLUE','Purple','Brown'],
+    ans: 1
+  };
+  const inner = document.getElementById('game-inner');
+  // Inject PM trigger banner at top
+  inner.innerHTML = `
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar" style="width:100%;background:var(--cognitive)"></div></div>
+    <div class="game-card">
+      ${cogTag('Prospective Memory · Trigger')}
+      <h3 class="game-title">${distractorQ.q}</h3>
+      <p class="game-desc">Select the correct answer.</p>
+      <div id="pm-trigger-btn-wrap" style="margin-bottom:1rem;">
+        <div style="height:44px;"></div>
+      </div>
+      <div class="opts" id="pm-opts">
+        ${distractorQ.opts.map((o,i)=>`
+          <div class="opt ${o==='BLUE'?'pm-has-blue':''}" onclick="answerPMTrigger(${i===distractorQ.ans}, ${o==='BLUE'})">
+            <div class="opt-letter">${['A','B','C','D'][i]}</div>
+            <span>${o}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // Show the special remember button prominently since BLUE is visible
+  document.getElementById('pm-trigger-btn-wrap').innerHTML = `
+    <button onclick="pmUserRemembered()" style="
+      width:100%;padding:12px;border-radius:12px;border:2px solid var(--cognitive);
+      background:var(--cognitive-l);color:var(--cognitive);font-family:'Nunito',sans-serif;
+      font-weight:700;font-size:14px;cursor:pointer;animation:pulse-target .8s ease infinite alternate;
+    ">🔔 I remember my task! (tap here first)</button>`;
+
+  state.pmRemembered = false;
+  startTimer(20, ()=>{ scoreCog(state.pmRemembered?100:10); setTimeout(()=>launchCogGame(state.cogGameIdx+1),400); });
+
+  window.pmUserRemembered = function(){
+    state.pmRemembered = true;
+    document.getElementById('pm-trigger-btn-wrap').innerHTML = `
+      <div style="padding:10px;background:var(--physical-l);border-radius:10px;color:var(--green);font-weight:700;font-size:13px;text-align:center;">✓ Great! You remembered. Now answer the question.</div>`;
+  };
+
+  window.answerPMTrigger = function(isCorrect, isBlue){
+    clearTimer();
+    const finalScore = state.pmRemembered ? 100 : 15;
+    scoreCog(finalScore);
+    setTimeout(()=>launchCogGame(state.cogGameIdx+1), 500);
+  };
 }
 
 // ── 13. VERBAL FLUENCY ──
@@ -1501,9 +1694,17 @@ function finishDomain(){
   if(nextIdx<DOMAINS.length){
     showDomainIntro(nextIdx);
   } else {
-    goTo('s-loading');
-    setTimeout(()=>buildResults(),2200);
+    // Show celebration screen first
+    document.getElementById('cel-xp').textContent = state.xp + ' XP earned';
+    const chips = document.getElementById('cel-chips');
+    chips.innerHTML = DOMAINS.map(d=>`<span class="dc-chip" style="background:${d.light};color:${d.color}">${d.icon} ${d.label}</span>`).join('');
+    goTo('s-celebrate');
   }
+}
+
+function goToResults(){
+  goTo('s-loading');
+  setTimeout(()=>buildResults(), 1800);
 }
 
 // ══════════════════════════════════════════════════
@@ -1559,6 +1760,54 @@ function getInsight(domainId,score){
 }
 
 let radarChart=null;
+const RECOMMENDATIONS = {
+  cognitive:{
+    high:['🧩','Keep challenging your mind','Try learning a new language, instrument or skill. Novelty is the best cognitive workout.'],
+    low:['🧠','Build a daily brain habit','Start with 10 minutes of puzzles, reading or memory games every morning. Consistency matters more than intensity.']
+  },
+  physical:{
+    high:['🏃','Maintain your momentum','You are doing well. Focus on consistency and add one new physical challenge every month.'],
+    low:['🚶','Start with small movement goals','A 20-minute walk daily has the highest ROI of any physical intervention. Begin there.']
+  },
+  emotional:{
+    high:['🧘','Deepen your practice','Journalling your emotional patterns weekly can sharpen self-awareness and reveal growth over time.'],
+    low:['💛','Try a simple daily check-in','Spend 2 minutes each evening naming three emotions you felt that day. This builds awareness over time.']
+  },
+  social:{
+    high:['🤝','Invest in depth over breadth','Reach out to one meaningful connection this week with intentional presence, not just a message.'],
+    low:['📞','Reconnect with one person','Identify one relationship worth nurturing and make a specific plan to reach out this week.']
+  }
+};
+
+function buildRecommendations(adjusted){
+  const sorted = DOMAINS.map(d=>({...d, sc:adjusted[d.id]})).sort((a,b)=>a.sc-b.sc);
+  const recs = document.getElementById('recs-inner');
+  recs.innerHTML = '';
+  // Show top 3 recommendations — lowest scoring domains first
+  sorted.slice(0,3).forEach(d=>{
+    const isLow = d.sc < 60;
+    const r = RECOMMENDATIONS[d.id][isLow?'low':'high'];
+    recs.innerHTML += `
+      <div class="rec-item">
+        <div class="rec-icon" style="background:${d.light}">${r[0]}</div>
+        <div class="rec-body">
+          <div class="rec-domain" style="color:${d.color}">${d.label}</div>
+          <div class="rec-title">${r[1]}</div>
+          <div class="rec-desc">${r[2]}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function checkClinicalFlags(adjusted){
+  const lowDomains = DOMAINS.filter(d=>adjusted[d.id]<35).map(d=>d.label);
+  if(lowDomains.length>0){
+    document.getElementById('clinical-flag').style.display='flex';
+    document.getElementById('cf-text').textContent =
+      `Your ${lowDomains.join(' and ')} score${lowDomains.length>1?'s are':' is'} in a range that some people find challenging. This assessment is not a clinical diagnosis. If these areas are affecting your daily life, speaking with a qualified professional can make a meaningful difference.`;
+  }
+}
+
 function buildResults(){
   const raw={};
   DOMAINS.forEach(d=>{ raw[d.id]=domainScore(d.id); });
@@ -1573,7 +1822,6 @@ function buildResults(){
 
   // Reliability
   const totalFlags=Object.values(state.validityFlags).flat().length;
-  const relEl=document.getElementById('reliability-row');
   const relDot=document.getElementById('rel-dot');
   const relTxt=document.getElementById('rel-text');
   if(totalFlags>=4){
@@ -1583,6 +1831,9 @@ function buildResults(){
     relDot.style.background='var(--leaf)';
     relTxt.textContent='High response reliability';
   }
+
+  // Clinical flags
+  checkClinicalFlags(adjusted);
 
   // Radar
   if(radarChart) radarChart.destroy();
@@ -1625,32 +1876,55 @@ function buildResults(){
       </div>`;
   });
 
-  // Sub-domain breakdown
+  // Recommendations
+  buildRecommendations(adjusted);
+
+  // Sub-domain breakdown — accordion
   const bi=document.getElementById('breakdown-inner');
   bi.innerHTML='';
-  DOMAINS.forEach(d=>{
+  DOMAINS.forEach((d,di)=>{
     const sds=d.id==='cognitive'?COG_GAMES.map(g=>g.sd):[...new Set((getDataForDomain(d.id)||[]).map(q=>q.sd))];
+    const bodyId = 'bd-body-'+di;
+    const arrowId = 'bd-arrow-'+di;
     bi.innerHTML+=`
-      <div class="bd-section">
-        <div class="bd-header">
+      <div>
+        <div class="bd-accordion-header" onclick="toggleAccordion('${bodyId}','${arrowId}')">
           <div class="bd-dot" style="background:${d.color}"></div>
           <span class="bd-name">${d.icon} ${d.label}</span>
-          <span class="bd-overall">${adjusted[d.id]}/100</span>
+          <span style="margin-left:8px;font-size:12px;color:${d.color};font-weight:700;">${adjusted[d.id]}/100</span>
+          <span class="bd-accordion-arrow" id="${arrowId}">▼</span>
         </div>
-        <div class="bd-rows">
-          ${sds.map(sd=>{
-            const sc2=sdScore(d.id,sd);
-            return `<div class="bd-row">
-              <span class="bd-row-name">${sd}</span>
-              <div class="bd-row-bar-bg"><div class="bd-row-bar-fill" style="width:${sc2}%;background:${d.color}"></div></div>
-              <span class="bd-row-score" style="color:${d.color}">${sc2}</span>
-            </div>`;
-          }).join('')}
+        <div class="bd-accordion-body ${di===0?'open':''}" id="${bodyId}">
+          <div class="bd-rows">
+            ${sds.map(sd=>{
+              const sc2=sdScore(d.id,sd);
+              return `<div class="bd-row">
+                <span class="bd-row-name">${sd}</span>
+                <div class="bd-row-bar-bg"><div class="bd-row-bar-fill" style="width:${sc2}%;background:${d.color}"></div></div>
+                <span class="bd-row-score" style="color:${d.color}">${sc2}</span>
+              </div>`;
+            }).join('')}
+          </div>
         </div>
       </div>`;
   });
+  // Open first accordion arrow
+  setTimeout(()=>{
+    const a0 = document.getElementById('bd-arrow-0');
+    if(a0) a0.classList.add('open');
+    const b0 = document.getElementById('bd-body-0');
+    if(b0) b0.classList.add('open');
+  },100);
 
   goTo('s-results');
+}
+
+function toggleAccordion(bodyId, arrowId){
+  const body = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
 }
 
 // ══════════════════════════════════════════════════
@@ -1662,7 +1936,7 @@ function advanceGame(){ /* handled per game */ }
 
 function restart(){
   clearTimer();
-  state={phase:'welcome',domainIdx:0,qIdx:0,xp:0,scores:{physical:{},cognitive:{},emotional:{},social:{}},cogGameIdx:0,pmBannerShown:false,pmFlag:false,validityFlags:{physical:[],emotional:[],social:[]},currentList:[],gameTimer:null,timerSeconds:0};
+  state={phase:'welcome',domainIdx:0,qIdx:0,xp:0,scores:{physical:{},cognitive:{},emotional:{},social:{}},cogGameIdx:0,pmBannerShown:false,pmFlag:false,pmTriggerAt:null,pmRemembered:false,pmPhase:null,validityFlags:{physical:[],emotional:[],social:[]},currentList:[],gameTimer:null,timerSeconds:0};
   user={}; selGender='';
   document.querySelectorAll('.g-opt').forEach(e=>e.classList.remove('sel'));
   document.getElementById('f-name').value='';
