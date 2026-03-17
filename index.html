@@ -486,7 +486,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     </div>
     <div class="field">
       <label>Age</label>
-      <input type="number" id="f-age" placeholder="e.g. 28" min="6" max="99"/>
+      <input type="number" id="f-age" placeholder="e.g. 28" min="6" max="99" oninput="updateOccOptions()"/>
       <div class="field-err" id="e-age">Please enter a valid age (6–99)</div>
     </div>
     <div class="field">
@@ -501,15 +501,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <div class="field">
       <label>Occupation</label>
       <select id="f-occ">
-        <option value="">Select…</option>
-        <option>Student</option>
-        <option>Working professional</option>
-        <option>Homemaker</option>
-        <option>Retired</option>
-        <option>Self-employed</option>
-        <option>Healthcare worker</option>
-        <option>Other</option>
+        <option value="">Enter age first…</option>
       </select>
+      <div class="field-err" id="e-occ">Please select your occupation</div>
     </div>
     <button class="btn-primary" onclick="submitReg()" style="margin-top:.5rem;">Start Assessment →</button>
   </div>
@@ -883,16 +877,67 @@ function pickGender(el, g){
   selGender = g;
 }
 
-function submitReg(){
-  const name = document.getElementById('f-name').value.trim();
+function updateOccOptions(){
   const age = parseInt(document.getElementById('f-age').value);
+  const sel = document.getElementById('f-occ');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Select…</option>';
+  let opts = [];
+  if(age >= 6 && age <= 12){
+    opts = ['Student','Other'];
+  } else if(age >= 13 && age <= 17){
+    opts = ['Student','Part-time work','Other'];
+  } else if(age >= 18 && age <= 59){
+    opts = ['Student','Working professional','Homemaker','Self-employed','Healthcare worker','Other'];
+  } else if(age >= 60){
+    opts = ['Retired','Homemaker','Self-employed','Still working','Other'];
+  } else {
+    sel.innerHTML = '<option value="">Enter age first…</option>';
+    return;
+  }
+  opts.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o; opt.textContent = o;
+    if(o === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function submitReg(){
+  const nameRaw = document.getElementById('f-name').value.trim();
+  const ageRaw = document.getElementById('f-age').value;
+  const age = parseInt(ageRaw);
+  const occ = document.getElementById('f-occ').value;
   let ok = true;
-  const show = (id, show) => document.getElementById(id).style.display = show ? 'block':'none';
-  show('e-name', !name); if(!name) ok=false;
-  show('e-age', !(age>=6&&age<=99)); if(!(age>=6&&age<=99)) ok=false;
-  show('e-gender', !selGender); if(!selGender) ok=false;
+  const show = (id, vis, msg) => {
+    const el = document.getElementById(id);
+    el.style.display = vis ? 'block' : 'none';
+    if(msg) el.textContent = msg;
+  };
+
+  // Name: min 2 chars, letters/spaces/hyphens only
+  const nameValid = nameRaw.length >= 2 && /^[a-zA-Z\s\-'.]+$/.test(nameRaw);
+  const nameMsg = !nameRaw ? 'Please enter your name'
+    : nameRaw.length < 2 ? 'Name must be at least 2 characters'
+    : 'Name should contain letters only';
+  show('e-name', !nameValid, nameMsg); if(!nameValid) ok=false;
+
+  // Age: integer, 6–99
+  const ageValid = ageRaw !== '' && Number.isInteger(age) && age >= 6 && age <= 99;
+  const ageMsg = !ageRaw ? 'Please enter your age'
+    : age < 6 ? 'Minimum age is 6'
+    : age > 99 ? 'Please enter a valid age'
+    : 'Please enter a whole number';
+  show('e-age', !ageValid, ageMsg); if(!ageValid) ok=false;
+
+  // Gender
+  show('e-gender', !selGender, 'Please select your gender'); if(!selGender) ok=false;
+
+  // Occupation
+  show('e-occ', !occ, 'Please select your occupation'); if(!occ) ok=false;
+
   if(!ok) return;
-  user = { name, age, gender:selGender, occ: document.getElementById('f-occ').value, ag: ageGroup(age) };
+  user = { name: nameRaw, age, gender:selGender, occ, ag: ageGroup(age) };
   // init scores
   DOMAINS.forEach(d=>{
     const data = getDataForDomain(d.id);
@@ -1053,9 +1098,22 @@ function skipCurrent(){
 // ══════════════════════════════════════════════════
 // TIMER
 // ══════════════════════════════════════════════════
+// Tab visibility — pause timer when tab hidden
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    if(state.gameTimer){ clearInterval(state.gameTimer); state._timerPaused=true; }
+  } else {
+    if(state._timerPaused && state._timerResumeFn){
+      state._timerPaused=false;
+      state._timerResumeFn();
+    }
+  }
+});
+
 function startTimer(seconds, onEnd){
   clearTimer();
   let left = seconds;
+  state._timerResumeFn = ()=>startTimerFrom(left, onEnd);
   state.gameTimer = setInterval(()=>{
     left -= 0.1;
     const pct = Math.max(0, (left/seconds)*100);
@@ -1200,9 +1258,20 @@ function renderWordRecall(){
       <button class="btn-primary" style="margin-top:.5rem;" onclick="submitRecall()">Done →</button>`;
     document.getElementById('recall-inp').addEventListener('keydown',e=>{
       if(e.key==='Enter'){
-        const v=e.target.value.trim();
-        if(v){ typed.push(v.toLowerCase()); e.target.value='';
-          document.getElementById('recall-tags').innerHTML=typed.map(t=>`<span class="recall-tag">${t}</span>`).join('');
+        const v=e.target.value.trim().toLowerCase();
+        if(v){
+          const isDup = typed.includes(v);
+          typed.push(v); e.target.value='';
+          document.getElementById('recall-tags').innerHTML=typed.map((t,i)=>{
+            const prevOccurrence = typed.indexOf(t);
+            const isThisDup = prevOccurrence < i;
+            return `<span class="recall-tag" style="${isThisDup?'opacity:.4;text-decoration:line-through':''}">${t}</span>`;
+          }).join('');
+          if(isDup){
+            const inp=document.getElementById('recall-inp');
+            inp.placeholder='Already entered!';
+            setTimeout(()=>inp.placeholder='Type a word…',1200);
+          }
         }
       }
     });
@@ -1211,9 +1280,19 @@ function renderWordRecall(){
   window.submitRecall=function(){
     clearTimer();
     const wl=words.map(w=>w.toLowerCase());
+    // Deduplicate typed words — only count each word once
+    const uniqueTyped=[...new Set(typed.map(t=>t.toLowerCase().trim()).filter(Boolean))];
     let hits=0;
-    typed.forEach(t=>{ if(wl.includes(t)) hits++; });
-    document.getElementById('recall-tags').innerHTML=typed.map(t=>`<span class="recall-tag ${wl.includes(t)?'correct-tag':'wrong-tag'}">${t}</span>`).join('');
+    const seen=new Set();
+    uniqueTyped.forEach(t=>{
+      if(wl.includes(t)&&!seen.has(t)){ hits++; seen.add(t); }
+    });
+    document.getElementById('recall-tags').innerHTML=uniqueTyped.map(t=>`<span class="recall-tag ${wl.includes(t)?'correct-tag':'wrong-tag'}">${t}</span>`).join('');
+    if(uniqueTyped.length < typed.length){
+      const dupCount = typed.length - uniqueTyped.length;
+      const tagsEl = document.getElementById('recall-tags');
+      if(tagsEl) tagsEl.innerHTML += `<span style="font-size:11px;color:var(--faint);margin-left:4px;">(${dupCount} duplicate${dupCount>1?'s':''} removed)</span>`;
+    }
     setTimeout(()=>scoreCog((hits/words.length)*100),800);
   };
 }
@@ -1645,14 +1724,26 @@ function renderVerbalFluency(){
       <button class="btn-primary" style="margin-top:1rem;" onclick="submitFluency()">Done →</button>
     </div>`;
   document.getElementById('fluency-box').addEventListener('input',()=>{
-    const words=document.getElementById('fluency-box').value.split(',').map(w=>w.trim()).filter(Boolean);
-    document.getElementById('fluency-count').textContent=`Words typed: ${words.length}`;
+    const raw=document.getElementById('fluency-box').value.split(',').map(w=>w.trim().toLowerCase()).filter(Boolean);
+    const unique=[...new Set(raw)];
+    const dup=raw.length-unique.length;
+    document.getElementById('fluency-count').textContent=
+      `${unique.length} unique word${unique.length!==1?'s':''}${dup>0?' · '+dup+' duplicate'+(dup>1?'s':''):''}`;
   });
   window.submitFluency=function(){
     clearTimer();
-    const words=document.getElementById('fluency-box').value.split(',').map(w=>w.trim()).filter(Boolean);
-    const score=Math.min(100,words.length*10);
-    scoreCog(score);
+    const raw=document.getElementById('fluency-box').value.split(',').map(w=>w.trim().toLowerCase()).filter(Boolean);
+    // Deduplicate
+    const unique=[...new Set(raw)];
+    const dupCount=raw.length-unique.length;
+    const score=Math.min(100,unique.length*10);
+    // Show dedup feedback
+    const countEl=document.getElementById('fluency-count');
+    if(countEl){
+      countEl.textContent=`${unique.length} unique word${unique.length!==1?'s':''} counted${dupCount>0?' ('+dupCount+' duplicate'+(dupCount>1?'s':'')+' removed)':''}`;
+      countEl.style.color=dupCount>0?'var(--emotional)':'var(--green)';
+    }
+    setTimeout(()=>scoreCog(score),600);
   };
   startTimer(30,()=>{ window.submitFluency(); });
 }
@@ -1711,6 +1802,17 @@ function goToResults(){
 // RESULTS
 // ══════════════════════════════════════════════════
 function avg(arr){ return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0; }
+
+function domainCompletionPct(domainId){
+  const sc=state.scores[domainId];
+  const all=Object.values(sc).flat();
+  if(domainId==='cognitive'){
+    const expected=COG_GAMES.length;
+    return Math.round((all.length/expected)*100);
+  }
+  const expected=getDataForDomain(domainId).length;
+  return expected>0?Math.round((all.length/expected)*100):0;
+}
 
 function domainScore(domainId){
   const sc=state.scores[domainId];
@@ -1863,16 +1965,18 @@ function buildResults(){
   DOMAINS.forEach(d=>{
     const sc=adjusted[d.id];
     const lv2=getLevel(sc);
+    const cPct=domainCompletionPct(d.id);
+    const isIncomplete=cPct<50;
     dg.innerHTML+=`
-      <div class="d-card">
+      <div class="d-card" style="${isIncomplete?'border-color:#f5c87a;':''}">
         <div class="d-card-head">
           <span class="d-icon">${d.icon}</span>
-          <span class="d-score" style="background:${d.light};color:${d.color}">${sc}/100</span>
+          <span class="d-score" style="background:${isIncomplete?'#fff8f0':d.light};color:${isIncomplete?'#92580a':d.color}">${isIncomplete?'Incomplete':sc+'/100'}</span>
         </div>
         <div class="d-name">${d.label}</div>
-        <div class="d-level-txt" style="color:${lv2.color}">${lv2.label}</div>
-        <div class="d-bar-bg"><div class="d-bar-fill" style="width:${sc}%;background:${d.color}"></div></div>
-        <div class="d-insight">${getInsight(d.id,sc)}</div>
+        <div class="d-level-txt" style="color:${isIncomplete?'#92580a':lv2.color}">${isIncomplete?'Only '+cPct+'% completed':lv2.label}</div>
+        <div class="d-bar-bg"><div class="d-bar-fill" style="width:${isIncomplete?cPct:sc}%;background:${isIncomplete?'#f5c87a':d.color}"></div></div>
+        <div class="d-insight">${isIncomplete?'This section was not completed enough for a reliable score. Consider retaking the assessment.':getInsight(d.id,sc)}</div>
       </div>`;
   });
 
@@ -1936,7 +2040,7 @@ function advanceGame(){ /* handled per game */ }
 
 function restart(){
   clearTimer();
-  state={phase:'welcome',domainIdx:0,qIdx:0,xp:0,scores:{physical:{},cognitive:{},emotional:{},social:{}},cogGameIdx:0,pmBannerShown:false,pmFlag:false,pmTriggerAt:null,pmRemembered:false,pmPhase:null,validityFlags:{physical:[],emotional:[],social:[]},currentList:[],gameTimer:null,timerSeconds:0};
+  state={phase:'welcome',domainIdx:0,qIdx:0,xp:0,scores:{physical:{},cognitive:{},emotional:{},social:{}},cogGameIdx:0,pmBannerShown:false,pmFlag:false,pmTriggerAt:null,pmRemembered:false,pmPhase:null,validityFlags:{physical:[],emotional:[],social:[]},currentList:[],gameTimer:null,timerSeconds:0,_timerPaused:false,_timerResumeFn:null};
   user={}; selGender='';
   document.querySelectorAll('.g-opt').forEach(e=>e.classList.remove('sel'));
   document.getElementById('f-name').value='';
